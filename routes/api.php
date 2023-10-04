@@ -17,3 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// 	Route::group(['prefix' => '/repository'],function (){
+//       Route::get('/',[RepositoryController::class,'index'])->name('get-repositories');
+    //   Route::get('/{repository}',[RepositoryController::class,'show'])->name('get-repository');
+    //   Route::post('/',[RepositoryController::class,'store'])->name('store-repository');
+    //   Route::delete('/{repository}',[RepositoryController::class,'destroy'])->name('delete-repository');
+// });
