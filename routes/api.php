@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SongController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +19,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// 	Route::group(['prefix' => '/repository'],function (){
-//       Route::get('/',[RepositoryController::class,'index'])->name('get-repositories');
+	Route::group(['prefix' => '/song'],function (){
+      Route::get('/',[SongController::class,'index'])->name('get-songs');
     //   Route::get('/{repository}',[RepositoryController::class,'show'])->name('get-repository');
     //   Route::post('/',[RepositoryController::class,'store'])->name('store-repository');
     //   Route::delete('/{repository}',[RepositoryController::class,'destroy'])->name('delete-repository');
-// });
+});
