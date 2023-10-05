@@ -1,8 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Socialite\Facades\Socialite;
-use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,25 +13,8 @@ use App\Models\User;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+	Route::group(['prefix' => '/auth'],function (){
+      Route::get('/redirect',[AuthController::class,'authSpotify'])->name('auth-spotify');
+      Route::get('/callback',[AuthController::class,'callbackSpotify'])->name('callbackSpotify');
 
-Route::get('/', function () {
-    return view('welcome');
-});
- ///////AuthO : Spotify
-Route::get('/auth/redirect', function () {
-    return Socialite::driver('spotify')->redirect();
-});
- 
-Route::get('/auth/callback', function () {
-    $spotifyUser = Socialite::driver('spotify')->stateless()->user();
-
-    // dd($spotifyUser);
-    // $user->token
-    $user = User::updateOrCreate([
-        'idSpotify' => $spotifyUser->id,
-    ], [
-        'name' => $spotifyUser->name,
-        'email' => $spotifyUser->email,
-        'avatar' => $spotifyUser->avatar,
-    ]);
 });

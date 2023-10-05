@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
@@ -96,12 +96,8 @@ class GroupController extends Controller
     public function join($token){
         $group = $this->showFromToken($token);
         if($group){
-            $data = [
-                'user_id' => auth()->user()->id,
-                'group_id' => $group->id,
-            ];
-            //insert data
-            
+                $user = Auth::user()->id;
+                $user->groups()->attach($group->id);
         }else{
             return response()->json(['message' =>'Groupe non trouvé'], 404);
         }
