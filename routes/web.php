@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+ ///////AuthO : Spotify
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('spotify')->redirect();
+});
+ 
+Route::get('/auth/callback', function () {
+    $spotifyUser = Socialite::driver('spotify')->stateless()->user();
+
+    // dd($spotifyUser);
+    // $user->token
+    $user = User::updateOrCreate([
+        'idSpotify' => $spotifyUser->id,
+    ], [
+        'name' => $spotifyUser->name,
+        'email' => $spotifyUser->email,
+        'avatar' => $spotifyUser->avatar,
+    ]);
 });

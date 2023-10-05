@@ -17,20 +17,22 @@ class SongController extends Controller
         return $songs;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'artist' => 'required|string|max:255',
+            'previewUrl' => 'required|string|max:255',
+        ]);
+
+        // Créer une nouvelle chanson
+        $group = Song::create($validatedData);
+
+        return response()->json($group, 201);
     }
 
     /**
@@ -38,17 +40,7 @@ class SongController extends Controller
      */
     public function show(Song $song)
     {
-        //
-    }
-
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Song $song)
-    {
-        //
+        return $song;
     }
 
 }

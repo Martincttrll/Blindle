@@ -7,22 +7,23 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-   
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'string|max:255',
+            'avatar' => 'string',
+            'idSpotify' => 'string'
+        ]);
+
+
+        $user = User::create($validatedData);
+
+        return response()->json($user, 201);
     }
 
     /**
@@ -30,36 +31,30 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        if (!$user) {
-            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
-        }
-
-        return response()->json(['user' => $user], 200);
-    
+        return $user;
     }
 
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, User $user)
     {
-        //
-    }
+        if (!$user) {
+            return response()->json(['message' => 'user non trouvé'], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        //
+        // Valider les données de la requête
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'nbWin' => 'int|max:11',
+            'nbGame' => 'int|max:11',
+            'email' => 'string|max:255',
+        ]);
+
+        // Mettre à jour les données du user
+        $user->update($validatedData);
+
+        return response()->json(['message' => 'user mis à jour avec succès'], 200);
     }
 }
