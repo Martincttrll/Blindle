@@ -28,7 +28,6 @@ class GroupController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        // Créer une nouvelle chanson
         $group = Group::create($validatedData);
 
         return response()->json($group, 201);
@@ -46,7 +45,7 @@ class GroupController extends Controller
      */
     public function showFromToken($token)
     {
-        $group = Group::where('token', $token)->first();
+        $group = Group::with('users')->where('token', $token)->first();
 
         if (!$group) {
             return response()->json(['message' => 'Aucun groupe trouvé avec ce token'], 404);
@@ -96,8 +95,11 @@ class GroupController extends Controller
     public function join($token){
         $group = $this->showFromToken($token);
         if($group){
-                $user = Auth::user()->id;
+            $user = Auth::user();
+            if (!$user->groups()->where('group_id', $group->id)->exists()) {
                 $user->groups()->attach($group->id);
+            }
+            return $group;
         }else{
             return response()->json(['message' =>'Groupe non trouvé'], 404);
         }

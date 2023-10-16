@@ -21,7 +21,14 @@ class AuthController extends Controller
             'name' => $spotifyUser->name,
             'email' => $spotifyUser->email,
             'avatar' => $spotifyUser->avatar,
+            'spotifyAccessToken' => $spotifyUser->access_token,
+            'spotifyRefreshToken' => $spotifyUser->refreshToken,
+            'spotifyExpiresIn' => $spotifyUser->expiresIn
         ]);
-        return response()->json(['token' => $user->createToken("API TOKEN")->plainTextToken], 200);    
+
+
+
+
+        return response()->json(['token' => $spotifyUser], 200);    
     } 
 }

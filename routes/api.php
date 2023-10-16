@@ -40,6 +40,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
       Route::group(['prefix' => '/user'],function (){
             Route::get('/current',[UserController::class,'showCurrent'])->name('get-current');
+            /////A FAIRE
+            Route::get('/signout',[UserController::class,'signOut'])->name('sign-out');
+
 
       });
 
