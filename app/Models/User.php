@@ -23,6 +23,9 @@ class User extends Authenticatable
         'idSpotify',
         'nbWin',
         'nbGame',
+        'spotifyAccessToken',
+        'spotifyRefreshToken',
+        'spotifyExpiresIn',
     ];
 
     /**

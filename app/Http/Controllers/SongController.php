@@ -30,9 +30,9 @@ class SongController extends Controller
         ]);
 
         // Créer une nouvelle chanson
-        $group = Song::create($validatedData);
+        $song = Song::create($validatedData);
 
-        return response()->json($group, 201);
+        return response()->json($song, 201);
     }
 
     /**
