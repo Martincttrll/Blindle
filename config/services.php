@@ -31,10 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'spotify' => [    
-    'client_id' => env('SPOTIFY_CLIENT_ID'),  
-    'client_secret' => env('SPOTIFY_CLIENT_SECRET'),  
-    'redirect' => env('SPOTIFY_REDIRECT_URI') 
+    'spotify' => [
+        'client_id' => env('SPOTIFY_CLIENT_ID'),
+        'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+        'redirect' => env('SPOTIFY_REDIRECT_URI'),
+        'scope' => ['user-library-read', 'playlist-read-private', 'ugc-image-upload', 'user-follow-read', 'user-read-email'],
     ],
 
 ];

@@ -6,17 +6,20 @@ use App\Models\Song;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
-
+use App\Http\Controllers\SpotifyController;
 
 class AuthController extends Controller
 {
     public function authSpotify()
     {
-        return Socialite::driver('spotify')->redirect();
+        return Socialite::driver('spotify')
+            ->setScopes(['user-library-read', 'playlist-read-private'])
+            ->redirect();
     }
 
     public function callbackSpotify()
     {
+        ////ENLEVER STATELESS() QUAND EN PROD, C BIEN POUR DEV
         $spotifyUser = Socialite::driver('spotify')->stateless()->user();
         $user = User::updateOrCreate([
             'idSpotify' => $spotifyUser->id,
@@ -29,15 +32,8 @@ class AuthController extends Controller
             'spotifyExpiresIn' => $spotifyUser->expiresIn
         ]);
 
-        /////A TESTER
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $spotifyUser->token,
-        ])->get('https://api.spotify.com/v1/me/tracks');
-
-        if ($response->successful()) {
-            $likedTracks = $response->json()['items'];
-
+        if ($user) {
+            $result =  SpotifyController::retrieveLikedTracks($user);
             // foreach ($likedTracks as $trackData) {
 
             //     $trackName = $trackData['track']['name'];
@@ -51,11 +47,16 @@ class AuthController extends Controller
             //         'previewUrl' => $artistNames,
             //     ]);
             // }
-
-
-            return response()->json(['token' => $user->createToken("API TOKEN")->plainTextToken, 'songs' => $likedTracks], 200);
+            if (is_array($result) && isset($result['songs'])) {
+                return response()->json(['songs' => $result['songs']], 200);
+            } elseif (is_array($result) && isset($result['error'])) {
+                // Gestion de l'erreur renvoyée par retrieveLikedTracks
+                return response()->json(['error' => $result['error']], 500);
+            } else {
+                return response()->json(['error' => 'Erreur inattendue', 'result' => $result], 500);
+            }
         } else {
-            return $response;
+            return response()->json(['error' => 'Erreur lors de la création/mise à jour de l\'utilisateur'], 500);
         }
     }
 }
