@@ -7,6 +7,8 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\SpotifyController;
+use Illuminate\Support\Facades\Auth;
+
 
 class AuthController extends Controller
 {
@@ -32,6 +34,9 @@ class AuthController extends Controller
         ]);
 
         if ($user) {
+
+            $token = $user->createToken("API TOKEN")->plainTextToken;
+
             $result =  SpotifyController::retrieveLikedTracks($user);
 
             //Insert bdd
@@ -58,7 +63,7 @@ class AuthController extends Controller
                 }
             }
             if (is_array($result) && count($result) > 1) {
-                return response()->json(['songs' => $result], 200);
+                return response()->json(["token" => $token, "user" => $user], 200);
             } elseif (isset($result['error'])) {
                 // Gestion de l'erreur renvoyée par retrieveLikedTracks
                 return response()->json(['error' => $result['error']], 500);
@@ -68,5 +73,15 @@ class AuthController extends Controller
         } else {
             return response()->json(['error' => 'Erreur lors de la création/mise à jour de l\'utilisateur'], 500);
         }
+    }
+
+    public function logOut()
+    {
+        $user = Auth::user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            return response()->json(["Utilisateur bien deconecte"], 200);
+        }
+        return response()->json(["Utilisateur non trouvé"], 400);
     }
 }

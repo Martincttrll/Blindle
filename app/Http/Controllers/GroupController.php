@@ -74,7 +74,6 @@ class GroupController extends Controller
         $group->update($validatedData);
 
         return response()->json(['message' => 'Groupe mis à jour avec succès'], 200);
-    
     }
 
     /**
@@ -92,16 +91,29 @@ class GroupController extends Controller
     }
 
 
-    public function join($token){
+    public function join($token)
+    {
         $group = $this->showFromToken($token);
-        if($group){
+        if ($group) {
             $user = Auth::user();
             if (!$user->groups()->where('group_id', $group->id)->exists()) {
                 $user->groups()->attach($group->id);
             }
-            return $group;
-        }else{
-            return response()->json(['message' =>'Groupe non trouvé'], 404);
+            //Ajout des tracks au group
+            //Besoin si j'intègre fonction de suppression de sons ou qu'on visualise les musique dans le lobby avant de les play;
+            // foreach ($user->songs as $song) {
+
+            //     $isAlreadyAttached = $group->songs()->wherePivot('song_id', $song->id)->exists();
+            //     if (!$isAlreadyAttached) {
+            //         $group->songs()->attach($song->id);
+            //     }
+            // }
+
+
+
+            return response()->json(['group' => $group], 200);
+        } else {
+            return response()->json(['message' => 'Groupe non trouvé'], 404);
         }
     }
 }

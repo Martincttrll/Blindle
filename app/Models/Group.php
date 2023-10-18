@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class Group extends Model
 {
     use HasFactory;
-        protected $fillable = [
+    protected $fillable = [
         'name',
         'token',
     ];
@@ -23,8 +23,12 @@ class Group extends Model
         });
     }
 
-     public function users()
+    public function users()
     {
         return $this->belongsToMany(User::class);
+    }
+    public function songs()
+    {
+        return $this->belongsToMany(Song::class);
     }
 }
