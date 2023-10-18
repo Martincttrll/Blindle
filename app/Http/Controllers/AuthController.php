@@ -19,8 +19,7 @@ class AuthController extends Controller
 
     public function callbackSpotify()
     {
-        ////ENLEVER STATELESS() QUAND EN PROD, C BIEN POUR DEV
-        $spotifyUser = Socialite::driver('spotify')->stateless()->user();
+        $spotifyUser = Socialite::driver('spotify')->user();
         $user = User::updateOrCreate([
             'idSpotify' => $spotifyUser->id,
         ], [
@@ -34,22 +33,33 @@ class AuthController extends Controller
 
         if ($user) {
             $result =  SpotifyController::retrieveLikedTracks($user);
-            // foreach ($likedTracks as $trackData) {
 
-            //     $trackName = $trackData['track']['name'];
-            //     $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
+            //Insert bdd
+            foreach ($result as $trackData) {
+                $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
+                try {
+                    $song = Song::create([
 
-            //     Song::create([
-
-            //         'title' => $trackName,
-            //         'artist' => $artistNames,
-            //         'idSpotify' => $artistNames,
-            //         'previewUrl' => $artistNames,
-            //     ]);
-            // }
-            if (is_array($result) && isset($result['songs'])) {
-                return response()->json(['songs' => $result['songs']], 200);
-            } elseif (is_array($result) && isset($result['error'])) {
+                        'title' => $trackData['track']['name'],
+                        'artist' => $artistNames,
+                        'idSpotify' => $trackData['track']['id'],
+                        'previewUrl' => $trackData['track']['preview_url'],
+                    ]);
+                    $song->users()->attach($user->id);
+                } catch (\PDOException $e) {
+                    if ($e->errorInfo[1] === 1062) {
+                        // Le code 1062 correspond à une violation de contrainte unique
+                        $songId = Song::where('idSpotify', $trackData['track']['id'])->first()->id;
+                        $isAlreadyAttached = $user->songs()->wherePivot('song_id', $songId)->exists();
+                        if (!$isAlreadyAttached) {
+                            $user->songs()->attach($songId);
+                        }
+                    }
+                }
+            }
+            if (is_array($result) && count($result) > 1) {
+                return response()->json(['songs' => $result], 200);
+            } elseif (isset($result['error'])) {
                 // Gestion de l'erreur renvoyée par retrieveLikedTracks
                 return response()->json(['error' => $result['error']], 500);
             } else {

@@ -51,20 +51,6 @@ class SpotifyController extends Controller
             if ($response->successful()) {
                 $likedTracks = $response->json()['items'];
 
-                // foreach ($likedTracks as $trackData) {
-
-                //     $trackName = $trackData['track']['name'];
-                //     $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
-
-                //     Song::create([
-
-                //         'title' => $trackName,
-                //         'artist' => $artistNames,
-                //         'idSpotify' => $artistNames,
-                //         'previewUrl' => $artistNames,
-                //     ]);
-                // }
-
                 return $likedTracks;
             } else if ($response->status() === 403) {
                 $responseData = $response->json();
