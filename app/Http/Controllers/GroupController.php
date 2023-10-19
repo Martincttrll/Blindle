@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -115,5 +116,20 @@ class GroupController extends Controller
         } else {
             return response()->json(['message' => 'Groupe non trouvé'], 404);
         }
+    }
+
+    public function getRandomTrack($token)
+    {
+        $group = $this->showFromToken($token);
+
+        $users = $group->users;
+        $userIndex = rand(0, count($users) - 1);
+        $user = $users[$userIndex];
+
+        $songs = $user->songs->makeHidden(['songs']);
+        $songIndex = rand(0, count($songs) - 1);
+        $song = $songs[$songIndex];
+
+        return response()->json(['song' => $song, 'from' => $user->setVisible(["id", "name"])], 200);
     }
 }

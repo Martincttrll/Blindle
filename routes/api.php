@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', [SongController::class, 'index'])->name('get-songs');
             Route::get('/{song}', [SongController::class, 'show'])->name('get-song');
             Route::post('/', [SongController::class, 'store'])->name('store-repository');
+            Route::get('/random/{token}', [GroupController::class, 'getRandomTrack'])->name('get-random');
       });
 
       Route::group(['prefix' => '/group'], function () {
