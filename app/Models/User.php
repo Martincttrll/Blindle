@@ -54,4 +54,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Song::class);
     }
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class);
+    }
 }

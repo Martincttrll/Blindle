@@ -9,10 +9,13 @@ class Achievement extends Model
 {
     use HasFactory;
 
-protected $fillable = [
-    'name',
-    'desc'
-];
+    protected $fillable = [
+        'name',
+        'desc'
+    ];
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }
-

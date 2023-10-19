@@ -41,10 +41,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
       Route::group(['prefix' => '/game'], function () {
             Route::get('/random-song/{token}', [GameController::class, 'getRandomTrack'])->name('get-random');
             Route::post('/set-winner', [GameController::class, 'setWinner'])->name('set-winner');
+            Route::post('/try', [GameController::class, 'handleTry'])->name('handle-try');
       });
 
       Route::group(['prefix' => '/user'], function () {
             Route::get('/', [UserController::class, 'showCurrent'])->name('get-current');
+            Route::get('/history/{user}', [UserController::class, 'getHistory'])->name('get-history');
       });
 
       Route::get('/logout', [AuthController::class, 'logOut'])->name('logout');

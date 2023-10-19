@@ -65,4 +65,9 @@ class UserController extends Controller
 
         return response()->json(['message' => 'user mis à jour avec succès'], 200);
     }
+
+    public function getHistory(User $user)
+    {
+        return response()->json($user->groups);
+    }
 }

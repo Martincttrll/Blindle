@@ -21,7 +21,7 @@ class AchievementController extends Controller
      */
     public function store(Request $request)
     {
-         $validatedData = $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
         ]);
@@ -66,11 +66,22 @@ class AchievementController extends Controller
      */
     public function destroy(Achievement $achievement)
     {
-         if (!$achievement) {
+        if (!$achievement) {
             return response()->json(['message' => 'Achievement non trouvé'], 404);
         }
 
         $achievement->delete();
+        return response()->json(['message' => 'Achievement supprimé avec succès'], 200);
+    }
+
+    public function attachToUser(Achievement $achievement, $userId)
+    {
+        if (!$achievement) {
+            return response()->json(['message' => 'Achievement non trouvé'], 404);
+        }
+
+        $achievement->users()->attach($userId);
+
         return response()->json(['message' => 'Achievement supprimé avec succès'], 200);
     }
 }
