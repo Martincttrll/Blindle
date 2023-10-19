@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 
@@ -24,8 +25,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
       Route::group(['prefix' => '/song'], function () {
             Route::get('/', [SongController::class, 'index'])->name('get-songs');
             Route::get('/{song}', [SongController::class, 'show'])->name('get-song');
-            Route::post('/', [SongController::class, 'store'])->name('store-repository');
-            Route::get('/random/{token}', [GroupController::class, 'getRandomTrack'])->name('get-random');
+            Route::post('/', [SongController::class, 'store'])->name('store-song');
       });
 
       Route::group(['prefix' => '/group'], function () {
@@ -35,9 +35,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/', [GroupController::class, 'store'])->name('strore-group');
             Route::put('/{group}', [GroupController::class, 'update'])->name('update-group');
             Route::delete('/{group}', [GroupController::class, 'destroy'])->name('delete-group');
+            Route::get('/join/{token}', [GroupController::class, 'join'])->name('join-group');
+      });
 
-
-            Route::get('/join/{token}', [GroupController::class, 'join'])->name('test-group');
+      Route::group(['prefix' => '/game'], function () {
+            Route::get('/random-song/{token}', [GameController::class, 'getRandomTrack'])->name('get-random');
+            Route::post('/set-winner', [GameController::class, 'setWinner'])->name('set-winner');
       });
 
       Route::group(['prefix' => '/user'], function () {
@@ -46,4 +49,3 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
       Route::get('/logout', [AuthController::class, 'logOut'])->name('logout');
 });
-/////A FAIRE
