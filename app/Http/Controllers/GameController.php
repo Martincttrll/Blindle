@@ -24,6 +24,8 @@ class GameController extends Controller
         $songIndex = rand(0, count($songs) - 1);
         $song = $songs[$songIndex];
 
+        $group->songs()->attach($song->id);
+
         return response()->json(['song_id' => $song->setVisible(["id", "previewUrl"]), 'from' => $user->setVisible(["id", "name"])], 200);
     }
 

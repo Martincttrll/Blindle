@@ -7,7 +7,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\SpotifyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,7 +47,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
       Route::group(['prefix' => '/user'], function () {
             Route::get('/', [UserController::class, 'showCurrent'])->name('get-current');
             Route::get('/history/{user}', [UserController::class, 'getHistory'])->name('get-history');
+            Route::get('/refresh/{user}', [UserController::class, 'refreshLikedTracks'])->name('refresh-songs');
       });
+
+      Route::get('/test/{user}', [SpotifyController::class, 'retrieveLikedTracks']);
 
       Route::get('/logout', [AuthController::class, 'logOut'])->name('logout');
 });

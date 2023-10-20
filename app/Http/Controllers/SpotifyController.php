@@ -37,6 +37,7 @@ class SpotifyController extends Controller
 
     public static function retrieveLikedTracks($user, $maxRecursion = 3)
     {
+
         if ($user) {
             if ($maxRecursion <= 0) {
                 return response()->json(['error' => 'Limite d\'appels récursifs atteinte.'], 500);
@@ -52,18 +53,19 @@ class SpotifyController extends Controller
                 $likedTracks = $response->json()['items'];
 
                 return $likedTracks;
-            } else if ($response->status() === 403) {
+            } else if ($response->status() != 200) {
                 $responseData = $response->json();
-                if (isset($responseData['error']) && isset($responseData['error']['message']) && $responseData['error']['message'] === "Forbidden") {
+                if (isset($responseData['error']) && isset($responseData['error']['message'])) {
                     $newToken = SpotifyController::refreshToken($userId);
-
-                    return SpotifyController::retrieveLikedTracks($newToken, $maxRecursion - 1);
+                    return SpotifyController::retrieveLikedTracks($user, $maxRecursion - 1);
+                } else {
+                    return response()->json(['error' => $responseData], 500);
                 }
             } else {
                 return response()->json(['error' => $response], 500);
             }
         } else {
-            return response()->json(['error' => 'Utilisateur vide.'], 500);
+            return response()->json(['error' => 'Utilisateur introuvable.'], 404);
         }
     }
 }
