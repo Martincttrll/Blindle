@@ -50,7 +50,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/refresh/{user}', [UserController::class, 'refreshLikedTracks'])->name('refresh-songs');
       });
 
-      Route::get('/test/{user}', [SpotifyController::class, 'retrieveLikedTracks']);
 
       Route::get('/logout', [AuthController::class, 'logOut'])->name('logout');
 });
