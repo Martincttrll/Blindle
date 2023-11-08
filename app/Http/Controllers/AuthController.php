@@ -14,14 +14,14 @@ class AuthController extends Controller
 {
     public function authSpotify()
     {
-        return Socialite::driver('spotify')
-            ->setScopes(['user-library-read', 'playlist-read-private'])
+        return Socialite::driver('spotify')->stateless()
+            ->setScopes(['user-library-read', 'playlist-read-private', 'user-read-email'])
             ->redirect();
     }
 
     public function callbackSpotify()
     {
-        $spotifyUser = Socialite::driver('spotify')->user();
+        $spotifyUser = Socialite::driver('spotify')->stateless()->user();
         $user = User::updateOrCreate([
             'idSpotify' => $spotifyUser->id,
         ], [

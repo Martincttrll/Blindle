@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-	Route::group(['prefix' => '/auth'],function (){
-      Route::get('/redirect',[AuthController::class,'authSpotify'])->name('auth-spotify');
-      Route::get('/callback',[AuthController::class,'callbackSpotify'])->name('callbackSpotify');
 
+Route::group(['prefix' => '/auth'], function () {
+      Route::get('/redirect', [AuthController::class, 'authSpotify'])->name('auth-spotify');
+      Route::get('/callback', [AuthController::class, 'callbackSpotify'])->name('callbackSpotify');
 });
