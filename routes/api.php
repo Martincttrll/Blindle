@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AchievementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SongController;
@@ -48,6 +49,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', [UserController::class, 'showCurrent'])->name('get-current');
             Route::get('/history/{user}', [UserController::class, 'getHistory'])->name('get-history');
             Route::get('/refresh/{user}', [UserController::class, 'refreshLikedTracks'])->name('refresh-songs');
+      });
+      Route::group(['prefix' => '/achievement'], function () {
+            Route::get('/', [AchievementController::class, 'showFromUser'])->name('get-user-achievements');
+            Route::post('/attach/{achievement}', [AchievementController::class, 'attachToUser'])->name('attach-user-achievements');
       });
 
 
