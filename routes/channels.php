@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
+use App\Models\Group;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,13 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+Broadcast::channel('Group.{groupToken}', function ($user, $groupToken) {
+    // Vérifier si l'utilisateur appartient au groupe
+    $group = Group::where('token', $groupToken)->first();
+
+    if ($group && $user->groups()->where('group_id', $group->id)->exists()) {
+        return true; // L'utilisateur appartient au groupe
+    }
+
+    return false; // L'utilisateur n'appartient pas au groupe
+}, ['guards' => ['sanctum']]);

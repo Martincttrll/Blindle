@@ -69,7 +69,12 @@ class UserController extends Controller
 
     public function getHistory(User $user)
     {
-        return response()->json($user->groups);
+        return response()->json($user->groups()->latest()->take(10)->get());
+    }
+
+    public function getSongs(User $user)
+    {
+        return response()->json($user->songs()->orderBy('id', 'desc')->get());
     }
 
     public static function refreshLikedTracks($userId, $maxRecursion = 3)
@@ -86,18 +91,24 @@ class UserController extends Controller
             if ($songs) {
                 foreach ($songs as $trackData) {
                     try {
-                        $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
-                        $song = Song::updateOrCreate([
-                            'title' => $trackData['track']['name'],
-                            'artist' => $artistNames,
-                            'idSpotify' => $trackData['track']['id'],
-                            'previewUrl' => $trackData['track']['preview_url'],
-                        ]);
-                        $isAlreadyAttached = $song->users()->wherePivot('user_id', $user->id)->exists();
-                        if (!$isAlreadyAttached) {
-                            $song->users()->attach($user->id);
+                        $idSpotify = $trackData['track']['id'];
+                        $existingSong = Song::where('idSpotify', $idSpotify)->first();
+
+                        if (!$existingSong) {
+                            $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
+                            $song = Song::updateOrCreate([
+                                'title' => $trackData['track']['name'],
+                                'artist' => $artistNames,
+                                'idSpotify' => $trackData['track']['id'],
+                                'previewUrl' => $trackData['track']['preview_url'],
+                            ]);
+                            $isAlreadyAttached = $song->users()->wherePivot('user_id', $user->id)->exists();
+                            if (!$isAlreadyAttached) {
+                                $song->users()->attach($user->id);
+                            }
                         }
                     } catch (\Throwable $e) {
+                        dd($e);
                         return UserController::refreshLikedTracks($user->id, $maxRecursion - 1);
                     }
                 }

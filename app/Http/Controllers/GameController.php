@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\guessAnswer;
 use Illuminate\Http\Request;
 use App\Models\Group;
 use App\Models\User;
@@ -13,21 +14,29 @@ class GameController extends Controller
 {
     public function getRandomTrack($token)
     {
-
         $group = GroupController::showFromToken($token);
 
         $users = $group->users;
         $userIndex = rand(0, count($users) - 1);
         $user = $users[$userIndex];
 
-        $songs = $user->songs->makeHidden(['songs']);
+        $songs = $user->songs;
+
+        if (count($songs) === 0) {
+            return response()->json(['message' => "L'utilisateur n'a aucune musique associée."], 400);
+        }
+
         $songIndex = rand(0, count($songs) - 1);
         $song = $songs[$songIndex];
 
-        $group->songs()->attach($song->id);
+        $isAttached = $group->songs()->where('song_id', $song->id)->exists();
 
-        return response()->json(['song_id' => $song->setVisible(["id", "previewUrl"]), 'from' => $user->setVisible(["id", "name"])], 200);
+        if (!$isAttached) {
+            $group->songs()->attach($song->id);
+        }
+        return response()->json(['song' => $song->setVisible(["id", "previewUrl"]), 'from' => $user->setVisible(["id", "name"])], 200);
     }
+
 
 
     public function setWinner(Request $request)
@@ -66,6 +75,7 @@ class GameController extends Controller
         $validatedData = $request->validate([
             'input' => 'string',
             'player_id' => 'int',
+            'group_token' => 'int',
             'title_points' => 'int',
             'artist_points' => 'int',
             'song_id' => 'int'
@@ -83,15 +93,14 @@ class GameController extends Controller
 
 
         if (preg_replace('/[^a-zA-Z0-9]/', '', strtolower($userResponse)) === preg_replace('/[^a-zA-Z0-9]/', '', strtolower($titleAnswer))) {
-            // La réponse de l'utilisateur est correcte
-            // Effectuez les actions appropriées (comptabiliser les points, etc.)
-            return response()->json(["message" => $user->name . " à trouvé le titre !", "player" => $user->id, "title_points" => $tiltePoints, "user_points" => intval($validatedData["title_points"])], 200);
+            $datas = response()->json(["message" => $user->name . " à trouvé le titre !", "guess" => "title", "player" => $user->id, "title_points" => $tiltePoints, "user_points" => intval($validatedData["title_points"])], 200);
+            guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
         } else if (preg_replace('/[^a-zA-Z0-9]/', '', strtolower($userResponse)) === preg_replace('/[^a-zA-Z0-9]/', '', strtolower($artistAnswer))) {
-            // La réponse de l'utilisateur est incorrecte
-            // Donnez une rétroaction à l'utilisateur
-            return response()->json(["message" => $user->name . " à trouvé l'artiste !", "player" => $user->id, "artist_points" => $artistPoints, "user_points" => intval($validatedData["artist_points"])], 200);
+            $datas = response()->json(["message" => $user->name . " à trouvé l'artiste !", "guess" => "artist", "player" => $user->id, "artist_points" => $artistPoints, "user_points" => intval($validatedData["artist_points"])], 200);
+            guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
         } else {
-            return response()->json(["message" => "Mauvaise réponse."], 400);
+            $datas = response()->json(["message" => "Mauvaise réponse.", "guess" => null], 200);
+            guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
         }
     }
 }

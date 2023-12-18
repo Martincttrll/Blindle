@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
       Route::group(['prefix' => '/user'], function () {
             Route::get('/', [UserController::class, 'showCurrent'])->name('get-current');
             Route::get('/history/{user}', [UserController::class, 'getHistory'])->name('get-history');
+            Route::get('/songs/{user}', [UserController::class, 'getSongs'])->name('get-user-songs');
             Route::get('/refresh/{user}', [UserController::class, 'refreshLikedTracks'])->name('refresh-songs');
       });
       Route::group(['prefix' => '/achievement'], function () {
