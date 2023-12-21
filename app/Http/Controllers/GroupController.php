@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+
 use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\joinGroup;
 
 class GroupController extends Controller
 {
@@ -30,6 +32,11 @@ class GroupController extends Controller
         ]);
 
         $group = Group::create($validatedData);
+
+        $user = Auth::user();
+
+        $group->users()->attach($user);
+
 
         return response()->json($group, 201);
     }
@@ -100,6 +107,7 @@ class GroupController extends Controller
             if (!$user->groups()->where('group_id', $group->id)->exists()) {
                 $user->groups()->attach($group->id);
             }
+            joinGroup::dispatch($user->id, $token);
             //Ajout des tracks au group
             //Besoin si j'intègre fonction de suppression de sons ou qu'on visualise les musique dans le lobby avant de les play;
             // foreach ($user->songs as $song) {
@@ -112,7 +120,7 @@ class GroupController extends Controller
 
 
 
-            return response()->json(['group' => $group], 200);
+            return response()->json($group, 200);
         } else {
             return response()->json(['message' => 'Groupe non trouvé'], 404);
         }

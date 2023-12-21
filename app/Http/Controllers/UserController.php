@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Song;
 
 class UserController extends Controller
 {
@@ -68,6 +69,55 @@ class UserController extends Controller
 
     public function getHistory(User $user)
     {
-        return response()->json($user->groups);
+        return response()->json($user->groups()->latest()->take(10)->get());
+    }
+
+    public function getSongs(User $user)
+    {
+        return response()->json($user->songs()->orderBy('id', 'desc')->get());
+    }
+
+    public static function refreshLikedTracks($userId, $maxRecursion = 3)
+    {
+        if ($maxRecursion <= 0) {
+            return response()->json(['error' => 'Limite d\'appels récursifs atteinte.'], 500);
+        }
+        $user = User::find($userId);
+
+        if ($user) {
+            $songs = SpotifyController::retrieveLikedTracks($user);
+
+            // return $songs;
+            if ($songs) {
+                foreach ($songs as $trackData) {
+                    try {
+                        $idSpotify = $trackData['track']['id'];
+                        $existingSong = Song::where('idSpotify', $idSpotify)->first();
+
+                        if (!$existingSong) {
+                            $artistNames = implode(', ', array_column($trackData['track']['artists'], 'name'));
+                            $song = Song::updateOrCreate([
+                                'title' => $trackData['track']['name'],
+                                'artist' => $artistNames,
+                                'idSpotify' => $trackData['track']['id'],
+                                'previewUrl' => $trackData['track']['preview_url'],
+                            ]);
+                            $isAlreadyAttached = $song->users()->wherePivot('user_id', $user->id)->exists();
+                            if (!$isAlreadyAttached) {
+                                $song->users()->attach($user->id);
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        dd($e);
+                        return UserController::refreshLikedTracks($user->id, $maxRecursion - 1);
+                    }
+                }
+            } else {
+                return response()->json(['message' => 'La récupération des likes a échouée.', 'songs' => $songs], 500);
+            }
+            return response()->json(['message' => 'Les likes de l\'utilisateurs ont bien été syncronisé.'], 200);
+        } else {
+            return response()->json(['message' => 'Aucun utilisateur a été trouvé.'], 400);
+        }
     }
 }

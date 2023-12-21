@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Achievement;
 use Illuminate\Http\Request;
 
@@ -74,14 +75,28 @@ class AchievementController extends Controller
         return response()->json(['message' => 'Achievement supprimé avec succès'], 200);
     }
 
-    public function attachToUser(Achievement $achievement, $userId)
+    public function attachToUser(Achievement $achievement)
     {
+        $user = Auth::user();
         if (!$achievement) {
             return response()->json(['message' => 'Achievement non trouvé'], 404);
         }
 
-        $achievement->users()->attach($userId);
+        $achievement->users()->attach($user->id);
 
-        return response()->json(['message' => 'Achievement supprimé avec succès'], 200);
+        return response()->json(['message' => $achievement->name . ' remporté par ' . $user->name], 200);
+    }
+
+    public function showFromUser()
+    {
+        $user = Auth::user();
+
+
+        $userAchievements = $user->achievements()->select('id', 'name', 'description')->get()->each(function ($achievement) {
+            unset($achievement->pivot);
+        });
+
+
+        return response()->json(['achievements' => $userAchievements], 200);
     }
 }
