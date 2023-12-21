@@ -106,8 +106,8 @@ class GroupController extends Controller
             $user = Auth::user();
             if (!$user->groups()->where('group_id', $group->id)->exists()) {
                 $user->groups()->attach($group->id);
-                joinGroup::dispatch($user->id, $group->token);
             }
+            joinGroup::dispatch($user->id, $token);
             //Ajout des tracks au group
             //Besoin si j'intègre fonction de suppression de sons ou qu'on visualise les musique dans le lobby avant de les play;
             // foreach ($user->songs as $song) {

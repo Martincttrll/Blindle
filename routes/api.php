@@ -43,6 +43,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/random-song/{token}', [GameController::class, 'getRandomTrack'])->name('get-random');
             Route::post('/set-winner', [GameController::class, 'setWinner'])->name('set-winner');
             Route::post('/try', [GameController::class, 'handleTry'])->name('handle-try');
+            Route::get('/start/{token}', [GameController::class, 'startGame'])->name('start-game');
       });
 
       Route::group(['prefix' => '/user'], function () {
