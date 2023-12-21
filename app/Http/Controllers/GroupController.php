@@ -8,6 +8,7 @@ use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Events\joinGroup;
+use App\Events\leftGroup;
 
 class GroupController extends Controller
 {
@@ -121,6 +122,23 @@ class GroupController extends Controller
 
 
             return response()->json($group, 200);
+        } else {
+            return response()->json(['message' => 'Groupe non trouvé'], 404);
+        }
+    }
+    public function leave($token)
+    {
+        $group = $this->showFromToken($token);
+
+        if ($group) {
+            $user = Auth::user();
+            if ($user->groups()->where('group_id', $group->id)->exists()) {
+                $user->groups()->detach($group->id);
+                leftGroup::dispatch($user->id, $token);
+            }
+
+
+            return response()->json(['message' => 'Vous avez quitté le groupe avec succès'], 200);
         } else {
             return response()->json(['message' => 'Groupe non trouvé'], 404);
         }

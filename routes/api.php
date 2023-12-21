@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{group}', [GroupController::class, 'update'])->name('update-group');
             Route::delete('/{group}', [GroupController::class, 'destroy'])->name('delete-group');
             Route::get('/join/{token}', [GroupController::class, 'join'])->name('join-group');
+            Route::get('/leave/{token}', [GroupController::class, 'leave'])->name('leave-group');
       });
 
       Route::group(['prefix' => '/game'], function () {
