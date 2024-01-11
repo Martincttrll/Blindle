@@ -16,13 +16,15 @@ class startGame implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $groupToken;
+    public $nbManche;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($groupToken)
+    public function __construct($groupToken, $nbManche)
     {
         $this->groupToken = $groupToken;
+        $this->nbManche = $nbManche;
     }
 
     /**
@@ -40,7 +42,8 @@ class startGame implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            "groupToken" => $this->groupToken
+            "groupToken" => $this->groupToken,
+            "nbManche" => $this->nbManche
         ];
     }
 

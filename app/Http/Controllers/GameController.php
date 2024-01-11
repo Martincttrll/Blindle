@@ -15,11 +15,17 @@ use App\Http\Controllers\GroupController;
 class GameController extends Controller
 {
 
-    public function startGame($groupToken)
+    public function startGame(Request $request)
     {
+        $validatedData = $request->validate([
+            'token' => 'string',
+            'nbManche' => 'int',
+        ]);
+        $token = $validatedData["token"];
+        $nbManche = $validatedData["nbManche"];
         try {
-            startGame::dispatch($groupToken);
-            $this->getRandomTrack($groupToken);
+            startGame::dispatch($token, $nbManche);
+            $this->getRandomTrack($token);
             return response()->json(["message" => "Evenement envoyé."], 200);
         } catch (\Throwable $th) {
 
