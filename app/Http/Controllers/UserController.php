@@ -69,8 +69,11 @@ class UserController extends Controller
 
     public function getHistory(User $user)
     {
-        return response()->json($user->groups()->latest()->take(10)->get());
+        $history = $user->winningGroup()->latest()->take(10)->get();
+
+        return response()->json($history);
     }
+
 
     public function getSongs(User $user)
     {

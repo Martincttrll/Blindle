@@ -58,4 +58,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Achievement::class);
     }
+    public function winningGroup()
+    {
+        return $this->hasOne(Group::class, 'winner');
+    }
 }

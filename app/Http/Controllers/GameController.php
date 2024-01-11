@@ -71,7 +71,7 @@ class GameController extends Controller
         $group = Group::find($validatedData['group_id']);
         $user = User::find($validatedData['winner_id']);
 
-        if ($group) {
+        if ($group && empty($group->winner)) {
             $group->winner = $validatedData['winner_id'];
             $group->save();
 
@@ -98,30 +98,30 @@ class GameController extends Controller
             'group_token' => 'string',
             'title_points' => 'int',
             'artist_points' => 'int',
-            'song_id' => 'int'
+            'song_id' => 'int',
+            'alreadyGuess' => 'array'
         ]);
 
         $song = Song::find($validatedData['song_id']);
         $user = User::find($validatedData['player_id']);
 
-        $userResponse = $validatedData["input"];
-        $titleAnswer = $song->title;
-        $artistAnswer = $song->artist;
+        $userResponse = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($validatedData["input"]));
+        $titleAnswer = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($song->title));
+        $artistsAnswer = array_map('trim', explode(',', preg_replace('/[^a-zA-Z0-9,]/', '', strtolower($song->artist))));
 
-        $tiltePoints = ($validatedData["title_points"] - 15 * $validatedData["title_points"] / 100);
-        $artistPoints = ($validatedData["artist_points"] - 15 * $validatedData["artist_points"] / 100);
+        $tiltePoints = intval(($validatedData["title_points"] - 15 * $validatedData["title_points"] / 100));
+        $artistPoints = intval(($validatedData["artist_points"] - 15 * $validatedData["artist_points"] / 100));
 
-
-        if (preg_replace('/[^a-zA-Z0-9]/', '', strtolower($userResponse)) === preg_replace('/[^a-zA-Z0-9]/', '', strtolower($titleAnswer))) {
+        if ($userResponse === $titleAnswer && !in_array("title", $validatedData["alreadyGuess"])) {
             $datas = response()->json(["message" => $user->name . " à trouvé le titre !", "guess" => "title", "player" => $user->id, "title_points" => $tiltePoints, "user_points" => intval($validatedData["title_points"])], 200);
             guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
             return $datas;
-        } else if (preg_replace('/[^a-zA-Z0-9]/', '', strtolower($userResponse)) === preg_replace('/[^a-zA-Z0-9]/', '', strtolower($artistAnswer))) {
+        } elseif (in_array($userResponse, $artistsAnswer) && !in_array("artist", $validatedData["alreadyGuess"])) {
             $datas = response()->json(["message" => $user->name . " à trouvé l'artiste !", "guess" => "artist", "player" => $user->id, "artist_points" => $artistPoints, "user_points" => intval($validatedData["artist_points"])], 200);
             guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
             return $datas;
         } else {
-            $datas = response()->json(["message" => "Mauvaise réponse.", "guess" => null], 200);
+            $datas = response()->json(["message" => $validatedData["input"], "player" => $user->id, "guess" => null], 200);
             guessAnswer::dispatch($user->id, $validatedData["group_token"], $datas);
             return $datas;
         }
