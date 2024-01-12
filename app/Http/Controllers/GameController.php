@@ -33,7 +33,6 @@ class GameController extends Controller
         }
     }
 
-
     public function getRandomTrack($token)
     {
         $group = GroupController::showFromToken($token);
